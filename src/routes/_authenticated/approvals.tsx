@@ -24,7 +24,6 @@ interface Approval {
   denial_reason: string | null;
   created_at: string;
   tickets: { subject: string; priority: string } | null;
-  profiles: { full_name: string } | null;
 }
 
 function summarize(tool: string, input: Record<string, unknown>): string {
@@ -42,13 +41,18 @@ function ApprovalsPage() {
   const [rows, setRows] = useState<Approval[]>([]);
   const [filter, setFilter] = useState<"pending" | "approved" | "denied" | "all">("pending");
   const [busy, setBusy] = useState<Set<string>>(new Set());
+  const [profileMap, setProfileMap] = useState<Record<string, string>>({});
 
   const load = async () => {
     const { data } = await supabase
       .from("pending_approvals")
-      .select("*, tickets(subject,priority), profiles!pending_approvals_requested_by_fkey(full_name)")
+      .select("*, tickets(subject,priority)")
       .order("created_at", { ascending: false });
     setRows((data ?? []) as unknown as Approval[]);
+    const { data: profs } = await supabase.from("profiles").select("id,full_name");
+    const m: Record<string, string> = {};
+    for (const p of profs ?? []) m[p.id] = p.full_name;
+    setProfileMap(m);
   };
 
   useEffect(() => {
@@ -177,7 +181,7 @@ function ApprovalsPage() {
                     {summarize(r.tool_name, r.tool_input)}
                   </td>
                   <td className="px-3 py-2 text-xs text-muted-foreground">
-                    {r.profiles?.full_name ?? "—"}
+                    {profileMap[r.requested_by ?? ""] ?? "—"}
                   </td>
                   <td className="px-3 py-2">
                     <ToolStatusBadge status={r.status} />
