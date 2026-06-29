@@ -9,7 +9,6 @@ export interface TicketRow {
   id: string;
   subject: string;
   customer_name: string;
-  customer_email: string;
   status: "open" | "pending" | "resolved";
   priority: "low" | "medium" | "high";
   created_at: string;
@@ -33,7 +32,7 @@ export function TicketList({
     const load = async () => {
       const { data } = await supabase
         .from("tickets")
-        .select("*")
+        .select("id,subject,customer_name,status,priority,created_at,updated_at")
         .order("updated_at", { ascending: false });
       setTickets((data ?? []) as TicketRow[]);
     };
@@ -64,7 +63,6 @@ export function TicketList({
         const q = query.toLowerCase();
         return (
           t.subject.toLowerCase().includes(q) ||
-          t.customer_email.toLowerCase().includes(q) ||
           t.customer_name.toLowerCase().includes(q)
         );
       });
