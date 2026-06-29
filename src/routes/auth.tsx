@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
+import { resetDemoData } from "@/lib/reset-demo.functions";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({ meta: [{ title: "Sign in — Agent Gate" }] }),
@@ -36,10 +37,11 @@ function AuthPage() {
       return toast.error(error.message);
     }
     if (data.user) {
-      const { error: resetErr } = await supabase.rpc("reset_demo_data", {
-        _requested_by: data.user.id,
-      });
-      if (resetErr) console.warn("demo reset failed", resetErr);
+      try {
+        await resetDemoData();
+      } catch (resetErr) {
+        console.warn("demo reset failed", resetErr);
+      }
     }
     setBusy(false);
     nav({ to: "/" });
