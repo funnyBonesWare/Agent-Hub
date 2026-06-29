@@ -32,14 +32,14 @@ function InboxPage() {
       </div>
       {active ? (
         <>
-          <div data-tour="conversation" className="flex min-w-0 flex-1">
+          <div data-tour="conversation" className="contents">
             <ConversationThread
               ticket={active}
               composerSeed={composerSeed}
               onComposerConsumed={() => setComposerSeed(undefined)}
             />
           </div>
-          <div data-tour="copilot" className="flex">
+          <div data-tour="copilot" className="contents">
             <CopilotPanel
             ticket={{
               id: active.id,
