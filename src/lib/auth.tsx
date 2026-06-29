@@ -35,13 +35,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const loadProfile = async (uid: string) => {
+  const loadProfile = async (uid: string, fallbackEmail: string | null) => {
     const { data } = await supabase
       .from("profiles")
-      .select("id,email,full_name,role")
+      .select("id,full_name,role")
       .eq("id", uid)
       .maybeSingle();
-    setProfile((data as Profile | null) ?? null);
+    if (!data) {
+      setProfile(null);
+      return;
+    }
+    setProfile({ ...(data as Omit<Profile, "email">), email: fallbackEmail ?? "" });
   };
 
   useEffect(() => {
@@ -49,7 +53,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(s);
       setUser(s?.user ?? null);
       if (s?.user) {
-        setTimeout(() => loadProfile(s.user.id), 0);
+        const u = s.user;
+        setTimeout(() => loadProfile(u.id, u.email ?? null), 0);
       } else {
         setProfile(null);
       }
@@ -57,7 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
       setUser(data.session?.user ?? null);
-      if (data.session?.user) loadProfile(data.session.user.id);
+      if (data.session?.user) loadProfile(data.session.user.id, data.session.user.email ?? null);
       setLoading(false);
     });
     return () => sub.subscription.unsubscribe();
@@ -73,7 +78,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await supabase.auth.signOut();
       },
       refreshProfile: async () => {
-        if (user) await loadProfile(user.id);
+        if (user) await loadProfile(user.id, user.email ?? null);
       },
     }),
     [user, session, profile, loading],

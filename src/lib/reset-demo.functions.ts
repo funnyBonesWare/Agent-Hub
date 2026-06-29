@@ -1,0 +1,13 @@
+import { createServerFn } from "@tanstack/react-start";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+
+export const resetDemoData = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.rpc("reset_demo_data", {
+      _requested_by: context.userId,
+    });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
