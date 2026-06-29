@@ -124,7 +124,7 @@ function AuthPage() {
                   <Input value={password} onChange={(e) => setPassword(e.target.value)} type="password" required minLength={8} />
                 </div>
                 <p className="text-[11px] text-muted-foreground">
-                  New accounts are created with the <span className="font-medium text-foreground">agent</span> role. A supervisor can elevate access later.
+                  New accounts are created as <span className="font-medium text-foreground">supervisors</span> with full permissions.
                 </p>
                 <Button type="submit" className="w-full" disabled={busy}>
                   {busy ? "Creating…" : "Create account"}
