@@ -280,6 +280,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      reset_demo_data: { Args: { _requested_by: string }; Returns: undefined }
     }
     Enums: {
       approval_status: "pending" | "approved" | "denied"
