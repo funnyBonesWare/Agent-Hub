@@ -4,14 +4,16 @@ import { Shield, LogOut } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { RoleBadge } from "./badges";
+import { ReplayTourButton } from "./ProductTour";
 import { cn } from "@/lib/utils";
 
-function NavLink({ to, children }: { to: string; children: React.ReactNode }) {
+function NavLink({ to, children, dataTour }: { to: string; children: React.ReactNode; dataTour?: string }) {
   return (
     <Link
       to={to}
       className="text-sm text-muted-foreground transition-colors hover:text-foreground data-[status=active]:text-foreground data-[status=active]:font-medium"
       activeOptions={{ exact: to === "/" }}
+      data-tour={dataTour}
     >
       {children}
     </Link>
@@ -55,10 +57,11 @@ export function TopNav() {
           <span className="text-sm font-semibold tracking-tight">Agent Gate</span>
         </Link>
         <nav className="flex items-center gap-5">
-          <NavLink to="/">Inbox</NavLink>
+          <NavLink to="/" dataTour="nav-inbox">Inbox</NavLink>
           <Link
             to="/approvals"
             className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground data-[status=active]:text-foreground data-[status=active]:font-medium"
+            data-tour="nav-approvals"
           >
             Approval Queue
             {pending > 0 && (
@@ -69,11 +72,12 @@ export function TopNav() {
               </span>
             )}
           </Link>
-          <NavLink to="/audit">Audit Log</NavLink>
-          <NavLink to="/settings">Settings</NavLink>
+          <NavLink to="/audit" dataTour="nav-audit">Audit Log</NavLink>
+          <NavLink to="/settings" dataTour="nav-settings">Settings</NavLink>
         </nav>
       </div>
       <div className="flex items-center gap-3">
+        <ReplayTourButton />
         {profile && (
           <div className="flex items-center gap-2">
             <div className="text-right">
