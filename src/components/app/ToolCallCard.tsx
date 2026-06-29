@@ -76,7 +76,7 @@ export function ToolCallCard({
       )}
 
       {/* KB results */}
-      {call.status === "completed" && call.tool === "searchKnowledgeBase" && Array.isArray(call.output) && (
+      {call.status === "completed" && call.tool === "searchKnowledgeBase" && Array.isArray(call.output) ? (
         <div className="mt-2 space-y-1.5">
           {(call.output as { id: string; title: string; excerpt: string; score: number }[]).map((a) => (
             <div key={a.id} className="rounded-md border border-border bg-background/40 p-2">
@@ -88,10 +88,10 @@ export function ToolCallCard({
             </div>
           ))}
         </div>
-      )}
+      ) : null}
 
       {/* Draft */}
-      {call.status === "completed" && call.tool === "draftReply" && call.output && (
+      {call.status === "completed" && call.tool === "draftReply" && call.output ? (
         <div className="mt-2 rounded-md border border-emerald-500/30 bg-emerald-500/5 p-2">
           <div className="mb-1 flex items-center justify-between">
             <span className="text-[10px] font-medium uppercase text-emerald-300">Draft reply</span>
@@ -106,7 +106,7 @@ export function ToolCallCard({
           </div>
           <pre className="whitespace-pre-wrap font-sans text-[11px] leading-relaxed text-foreground">{(call.output as { body: string }).body}</pre>
         </div>
-      )}
+      ) : null}
 
       {call.status === "denied" && call.denialReason && (
         <p className="mt-2 text-[11px] text-red-300">Denied: {call.denialReason}</p>
