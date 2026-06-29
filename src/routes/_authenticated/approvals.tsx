@@ -168,7 +168,11 @@ function ApprovalsPage() {
                     {format(new Date(r.created_at), "MMM d, p")}
                   </td>
                   <td className="px-3 py-2 text-xs">
-                    <Link to="/" className="text-primary hover:underline">
+                    <Link
+                      to="/"
+                      search={{ ticket: r.ticket_id }}
+                      className="text-primary hover:underline"
+                    >
                       {r.tickets?.subject ?? "—"}
                     </Link>
                   </td>
