@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Sparkles, Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
+import { useServerFn } from "@tanstack/react-start";
+import { recordAutoAudit } from "@/lib/audit.functions";
 import { ToolCallCard } from "./ToolCallCard";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -10,7 +12,6 @@ import {
   runDraftReply,
   runSearchKnowledgeBase,
   createApprovalRequest,
-  writeAudit,
   newId,
   type CopilotMessage,
   type ToolCallEvent,
