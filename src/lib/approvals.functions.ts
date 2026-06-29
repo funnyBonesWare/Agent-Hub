@@ -61,8 +61,15 @@ export const resolveApproval = createServerFn({ method: "POST" })
     if (data.decision === "approve") {
       try {
         if (toolName === "sendEmail") {
-          const to = String(toolInput.to ?? "");
           const subject = String(toolInput.subject ?? "");
+          // Resolve recipient from the ticket server-side; client never sees
+          // customer_email anymore.
+          const { data: ticketRow } = await supabaseAdmin
+            .from("tickets")
+            .select("customer_email")
+            .eq("id", ticketId)
+            .single();
+          const to = ticketRow?.customer_email ?? "(unknown)";
           await supabaseAdmin.from("messages").insert({
             ticket_id: ticketId,
             sender_type: "system",

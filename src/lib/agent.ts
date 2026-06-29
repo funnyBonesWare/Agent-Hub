@@ -39,7 +39,6 @@ export interface TicketContext {
   id: string;
   subject: string;
   customer_name: string;
-  customer_email: string;
   priority: "low" | "medium" | "high";
   status: "open" | "pending" | "resolved";
   messages: { sender_type: string; body: string }[];
@@ -82,7 +81,9 @@ function planFromPrompt(prompt: string, ctx: TicketContext): Plan {
     const body = buildDraftBody(ctx, p);
     calls.push({
       tool: "sendEmail",
-      input: { to: ctx.customer_email, subject, body, ticketId: ctx.id },
+      // Recipient is resolved server-side from the ticket record so customer
+      // email PII never has to travel through the client.
+      input: { subject, body, ticketId: ctx.id },
     });
   }
 
@@ -173,16 +174,5 @@ export async function createApprovalRequest(
 
 // Side-effecting tool execution now lives in src/lib/approvals.functions.ts
 // (resolveApproval) so it can be gated by a server-side supervisor check.
-
-export async function writeAudit(row: {
-  ticket_id: string;
-  tool_name: ToolName;
-  tool_input: Record<string, unknown>;
-  outcome: "auto_completed" | "approved" | "denied" | "failed";
-  user_id: string;
-  approver_id?: string | null;
-}) {
-  await supabase.from("audit_log").insert(row as never);
-}
 
 export { planFromPrompt, newId };

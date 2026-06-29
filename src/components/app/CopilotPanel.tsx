@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Sparkles, Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
+import { useServerFn } from "@tanstack/react-start";
+import { recordAutoAudit } from "@/lib/audit.functions";
 import { ToolCallCard } from "./ToolCallCard";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -10,7 +12,6 @@ import {
   runDraftReply,
   runSearchKnowledgeBase,
   createApprovalRequest,
-  writeAudit,
   newId,
   type CopilotMessage,
   type ToolCallEvent,
@@ -40,6 +41,7 @@ export function CopilotPanel({
   onCopyDraft: (text: string) => void;
 }) {
   const { user, profile } = useAuth();
+  const auditAuto = useServerFn(recordAutoAudit);
   const [messages, setMessages] = useState<CopilotMessage[]>(() => memory[ticket.id] ?? []);
   const [input, setInput] = useState("");
   const [thinking, setThinking] = useState(false);
@@ -205,12 +207,12 @@ export function CopilotPanel({
             output = await runDraftReply(call.input as { ticketId: string; body: string });
           }
           patchToolCall(assistantId, call.id, { status: "completed", output });
-          await writeAudit({
-            ticket_id: ticket.id,
-            tool_name: call.tool,
-            tool_input: call.input,
-            outcome: "auto_completed",
-            user_id: user.id,
+          await auditAuto({
+            data: {
+              ticket_id: ticket.id,
+              tool_name: call.tool,
+              tool_input: call.input,
+            },
           });
         } catch (e) {
           console.error(e);
