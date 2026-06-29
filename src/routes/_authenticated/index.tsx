@@ -27,15 +27,20 @@ function InboxPage() {
 
   return (
     <div className="flex h-full">
-      <TicketList activeId={active?.id ?? null} onSelect={setActive} />
+      <div data-tour="tickets" className="contents">
+        <TicketList activeId={active?.id ?? null} onSelect={setActive} />
+      </div>
       {active ? (
         <>
-          <ConversationThread
-            ticket={active}
-            composerSeed={composerSeed}
-            onComposerConsumed={() => setComposerSeed(undefined)}
-          />
-          <CopilotPanel
+          <div data-tour="conversation" className="contents">
+            <ConversationThread
+              ticket={active}
+              composerSeed={composerSeed}
+              onComposerConsumed={() => setComposerSeed(undefined)}
+            />
+          </div>
+          <div data-tour="copilot" className="contents">
+            <CopilotPanel
             ticket={{
               id: active.id,
               subject: active.subject,
@@ -45,8 +50,9 @@ function InboxPage() {
               status: active.status,
               messages: ticketMessages,
             }}
-            onCopyDraft={(text) => setComposerSeed(text)}
-          />
+              onCopyDraft={(text) => setComposerSeed(text)}
+            />
+          </div>
         </>
       ) : (
         <div className="flex flex-1 items-center justify-center text-sm text-muted-foreground">
