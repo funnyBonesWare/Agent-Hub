@@ -24,7 +24,7 @@ function InboxPage() {
     if (active?.id === ticketParam) return;
     supabase
       .from("tickets")
-      .select("*")
+      .select("id,subject,customer_name,status,priority,created_at,updated_at")
       .eq("id", ticketParam)
       .maybeSingle()
       .then(({ data }) => {
@@ -62,7 +62,6 @@ function InboxPage() {
               id: active.id,
               subject: active.subject,
               customer_name: active.customer_name,
-              customer_email: active.customer_email,
               priority: active.priority,
               status: active.status,
               messages: ticketMessages,
