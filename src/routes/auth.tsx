@@ -19,7 +19,6 @@ function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
-  const [role, setRole] = useState<"agent" | "supervisor">("agent");
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
@@ -55,7 +54,7 @@ function AuthPage() {
       password,
       options: {
         emailRedirectTo: window.location.origin,
-        data: { full_name: name || email.split("@")[0], role },
+        data: { full_name: name || email.split("@")[0] },
       },
     });
     setBusy(false);
@@ -124,25 +123,9 @@ function AuthPage() {
                   <Label>Password</Label>
                   <Input value={password} onChange={(e) => setPassword(e.target.value)} type="password" required minLength={8} />
                 </div>
-                <div className="space-y-1.5">
-                  <Label>Role</Label>
-                  <div className="flex gap-2">
-                    {(["agent", "supervisor"] as const).map((r) => (
-                      <button
-                        type="button"
-                        key={r}
-                        onClick={() => setRole(r)}
-                        className={`flex-1 rounded-md border px-3 py-1.5 text-xs ${
-                          role === r
-                            ? "border-primary bg-primary/10 text-primary"
-                            : "border-border text-muted-foreground hover:text-foreground"
-                        }`}
-                      >
-                        {r}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                <p className="text-[11px] text-muted-foreground">
+                  New accounts are created with the <span className="font-medium text-foreground">agent</span> role. A supervisor can elevate access later.
+                </p>
                 <Button type="submit" className="w-full" disabled={busy}>
                   {busy ? "Creating…" : "Create account"}
                 </Button>
