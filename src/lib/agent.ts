@@ -171,42 +171,8 @@ export async function createApprovalRequest(
   return data;
 }
 
-export async function executeApprovedTool(
-  tool: ToolName,
-  input: Record<string, unknown>,
-) {
-  if (tool === "sendEmail") {
-    const { to, subject, ticketId } = input as {
-      to: string;
-      subject: string;
-      ticketId: string;
-    };
-    await supabase.from("messages").insert({
-      ticket_id: ticketId,
-      sender_type: "system",
-      body: `Email sent to ${to} — Subject: ${subject}`,
-    });
-    return { sent: true, to, subject };
-  }
-  if (tool === "updateTicketStatus") {
-    const { ticketId, newStatus, reason } = input as {
-      ticketId: string;
-      newStatus: "open" | "pending" | "resolved";
-      reason: string;
-    };
-    await supabase
-      .from("tickets")
-      .update({ status: newStatus })
-      .eq("id", ticketId);
-    await supabase.from("messages").insert({
-      ticket_id: ticketId,
-      sender_type: "system",
-      body: `Ticket status changed to ${newStatus} — ${reason}`,
-    });
-    return { updated: true, newStatus };
-  }
-  return null;
-}
+// Side-effecting tool execution now lives in src/lib/approvals.functions.ts
+// (resolveApproval) so it can be gated by a server-side supervisor check.
 
 export async function writeAudit(row: {
   ticket_id: string;

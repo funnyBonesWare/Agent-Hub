@@ -10,7 +10,6 @@ import {
   runDraftReply,
   runSearchKnowledgeBase,
   createApprovalRequest,
-  executeApprovedTool,
   writeAudit,
   newId,
   type CopilotMessage,
@@ -112,41 +111,20 @@ export function CopilotPanel({
           });
 
           if (row.status === "approved" && row.ticket_id === ticket.id) {
-            try {
-              await executeApprovedTool(row.tool_name as ToolName, row.tool_input);
-              if (user) {
-                await writeAudit({
-                  ticket_id: row.ticket_id,
-                  tool_name: row.tool_name as ToolName,
-                  tool_input: row.tool_input,
-                  outcome: "approved",
-                  user_id: user.id,
-                });
-              }
-              if (row.tool_name === "sendEmail") {
-                toast.success(`Email sent to ${(row.tool_input as { to: string }).to}`);
-              }
-              if (row.tool_name === "updateTicketStatus") {
-                toast.success(
-                  `Ticket status updated to ${(row.tool_input as { newStatus: string }).newStatus}`,
-                );
-              }
-              appendAssistant(
-                `✓ Action approved and executed: ${row.tool_name}.`,
+            // Side-effecting execution + audit now happens server-side in
+            // resolveApproval (supervisor-gated). Here we only sync UI state.
+            if (row.tool_name === "sendEmail") {
+              toast.success(`Email sent to ${(row.tool_input as { to: string }).to}`);
+            }
+            if (row.tool_name === "updateTicketStatus") {
+              toast.success(
+                `Ticket status updated to ${(row.tool_input as { newStatus: string }).newStatus}`,
               );
-            } catch (e) {
-              console.error(e);
             }
+            appendAssistant(
+              `✓ Action approved and executed: ${row.tool_name}.`,
+            );
           } else if (row.status === "denied") {
-            if (user) {
-              await writeAudit({
-                ticket_id: row.ticket_id,
-                tool_name: row.tool_name as ToolName,
-                tool_input: row.tool_input,
-                outcome: "denied",
-                user_id: user.id,
-              });
-            }
             appendAssistant(
               `Understood — the ${row.tool_name} request was denied${row.denial_reason ? ` (${row.denial_reason})` : ""}. I won't proceed with this action.`,
             );
