@@ -97,7 +97,7 @@ export const resolveApproval = createServerFn({ method: "POST" })
         await supabaseAdmin.from("audit_log").insert({
           ticket_id: ticketId,
           tool_name: toolName,
-          tool_input: toolInput,
+          tool_input: toolInput as never,
           outcome: "failed",
           user_id: claimed.requested_by ?? context.userId,
           approver_id: context.userId,
@@ -111,7 +111,7 @@ export const resolveApproval = createServerFn({ method: "POST" })
     await supabaseAdmin.from("audit_log").insert({
       ticket_id: ticketId,
       tool_name: toolName,
-      tool_input: toolInput,
+      tool_input: toolInput as never,
       outcome: data.decision === "approve" ? "approved" : "denied",
       user_id: claimed.requested_by ?? context.userId,
       approver_id: context.userId,
