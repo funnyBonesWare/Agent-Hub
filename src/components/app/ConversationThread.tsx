@@ -90,7 +90,7 @@ export function ConversationThread({
         <div className="min-w-0">
           <h2 className="truncate text-sm font-semibold">{ticket.subject}</h2>
           <p className="text-[11px] text-muted-foreground">
-            {ticket.customer_name} · {ticket.customer_email}
+            {ticket.customer_name}
           </p>
         </div>
         <div className="flex items-center gap-3">
