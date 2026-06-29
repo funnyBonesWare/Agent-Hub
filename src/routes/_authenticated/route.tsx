@@ -1,6 +1,7 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { TopNav } from "@/components/app/TopNav";
+import { ProductTour } from "@/components/app/ProductTour";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -14,6 +15,7 @@ export const Route = createFileRoute("/_authenticated")({
       <div className="min-h-0 flex-1">
         <Outlet />
       </div>
+      <ProductTour />
     </div>
   ),
 });
