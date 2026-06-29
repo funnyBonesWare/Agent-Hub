@@ -41,6 +41,7 @@ export function CopilotPanel({
   onCopyDraft: (text: string) => void;
 }) {
   const { user, profile } = useAuth();
+  const auditAuto = useServerFn(recordAutoAudit);
   const [messages, setMessages] = useState<CopilotMessage[]>(() => memory[ticket.id] ?? []);
   const [input, setInput] = useState("");
   const [thinking, setThinking] = useState(false);
