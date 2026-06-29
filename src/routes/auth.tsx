@@ -30,9 +30,18 @@ function AuthPage() {
   async function signIn(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) {
+      setBusy(false);
+      return toast.error(error.message);
+    }
+    if (data.user) {
+      const { error: resetErr } = await supabase.rpc("reset_demo_data", {
+        _requested_by: data.user.id,
+      });
+      if (resetErr) console.warn("demo reset failed", resetErr);
+    }
     setBusy(false);
-    if (error) return toast.error(error.message);
     nav({ to: "/" });
   }
 
