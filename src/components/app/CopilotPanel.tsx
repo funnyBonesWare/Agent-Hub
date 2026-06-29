@@ -207,12 +207,12 @@ export function CopilotPanel({
             output = await runDraftReply(call.input as { ticketId: string; body: string });
           }
           patchToolCall(assistantId, call.id, { status: "completed", output });
-          await writeAudit({
-            ticket_id: ticket.id,
-            tool_name: call.tool,
-            tool_input: call.input,
-            outcome: "auto_completed",
-            user_id: user.id,
+          await auditAuto({
+            data: {
+              ticket_id: ticket.id,
+              tool_name: call.tool,
+              tool_input: call.input,
+            },
           });
         } catch (e) {
           console.error(e);
