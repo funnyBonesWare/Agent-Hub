@@ -1,12 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { Lock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { ToolStatusBadge, EmptyState } from "@/components/app/badges";
-import { executeApprovedTool, writeAudit, type ToolName } from "@/lib/agent";
+import { resolveApproval } from "@/lib/approvals.functions";
 
 export const Route = createFileRoute("/_authenticated/approvals")({
   head: () => ({ meta: [{ title: "Approval Queue — Agent Gate" }] }),
@@ -37,7 +38,7 @@ function summarize(tool: string, input: Record<string, unknown>): string {
 }
 
 function ApprovalsPage() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [rows, setRows] = useState<Approval[]>([]);
   const [filter, setFilter] = useState<"pending" | "approved" | "denied" | "all">("pending");
   const [busy, setBusy] = useState<Set<string>>(new Set());
@@ -56,6 +57,7 @@ function ApprovalsPage() {
   };
 
   useEffect(() => {
+    if (profile?.role !== "supervisor") return;
     load();
     const ch = supabase
       .channel("approvals-page")
@@ -68,44 +70,19 @@ function ApprovalsPage() {
     return () => {
       supabase.removeChannel(ch);
     };
-  }, []);
+  }, [profile?.role]);
 
   async function resolve(row: Approval, approve: boolean) {
     if (!user) return;
     setBusy((s) => new Set(s).add(row.id));
     try {
-      const { error } = await supabase
-        .from("pending_approvals")
-        .update({
-          status: approve ? "approved" : "denied",
-          resolved_by: user.id,
-          resolved_at: new Date().toISOString(),
-          denial_reason: approve ? null : "Denied from queue",
-        } as never)
-        .eq("id", row.id);
-      if (error) throw error;
-      if (approve) {
-        await executeApprovedTool(row.tool_name as ToolName, row.tool_input);
-        await writeAudit({
-          ticket_id: row.ticket_id,
-          tool_name: row.tool_name as ToolName,
-          tool_input: row.tool_input,
-          outcome: "approved",
-          user_id: row.requested_by ?? user.id,
-          approver_id: user.id,
-        });
-        toast.success("Approved & executed");
-      } else {
-        await writeAudit({
-          ticket_id: row.ticket_id,
-          tool_name: row.tool_name as ToolName,
-          tool_input: row.tool_input,
-          outcome: "denied",
-          user_id: row.requested_by ?? user.id,
-          approver_id: user.id,
-        });
-        toast.success("Denied");
-      }
+      await resolveApproval({
+        data: {
+          approvalId: row.id,
+          decision: approve ? "approve" : "deny",
+        },
+      });
+      toast.success(approve ? "Approved & executed" : "Denied");
     } catch (e) {
       toast.error((e as Error).message);
     } finally {
@@ -118,6 +95,20 @@ function ApprovalsPage() {
   }
 
   const filtered = rows.filter((r) => (filter === "all" ? true : r.status === filter));
+
+  if (profile && profile.role !== "supervisor") {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <div className="flex flex-col items-center gap-2 rounded-lg border border-border bg-card p-8 text-center">
+          <Lock className="size-6 text-muted-foreground" />
+          <p className="text-sm font-medium">Supervisor access required</p>
+          <p className="max-w-xs text-xs text-muted-foreground">
+            The approval queue is restricted to supervisors. Switch accounts or ask one to share access.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto h-full max-w-6xl overflow-y-auto p-6">
