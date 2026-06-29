@@ -7,13 +7,30 @@ import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/")({
   head: () => ({ meta: [{ title: "Inbox — Agent Gate" }] }),
+  validateSearch: (s: Record<string, unknown>) => ({
+    ticket: typeof s.ticket === "string" ? s.ticket : undefined,
+  }),
   component: InboxPage,
 });
 
 function InboxPage() {
+  const { ticket: ticketParam } = Route.useSearch();
   const [active, setActive] = useState<TicketRow | null>(null);
   const [ticketMessages, setTicketMessages] = useState<{ sender_type: string; body: string }[]>([]);
   const [composerSeed, setComposerSeed] = useState<string | undefined>();
+
+  useEffect(() => {
+    if (!ticketParam) return;
+    if (active?.id === ticketParam) return;
+    supabase
+      .from("tickets")
+      .select("*")
+      .eq("id", ticketParam)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data) setActive(data as TicketRow);
+      });
+  }, [ticketParam, active?.id]);
 
   useEffect(() => {
     if (!active) return;
