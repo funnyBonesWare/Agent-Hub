@@ -26,33 +26,34 @@
           "openWorldHint": false
         },
         "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
           "type": "object",
           "properties": {
             "status": {
+              "description": "Filter by ticket status.",
               "type": "string",
               "enum": [
                 "open",
                 "pending",
                 "resolved"
-              ],
-              "description": "Filter by ticket status."
+              ]
             },
             "priority": {
+              "description": "Filter by priority.",
               "type": "string",
               "enum": [
                 "low",
                 "medium",
                 "high"
-              ],
-              "description": "Filter by priority."
+              ]
             },
             "limit": {
+              "description": "Max tickets to return (default 20).",
               "type": "integer",
-              "description": "Max tickets to return (default 20)."
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
             }
-          },
-          "additionalProperties": false,
-          "$schema": "http://json-schema.org/draft-07/schema#"
+          }
         },
         "outputSchema": null
       },
@@ -66,6 +67,7 @@
           "openWorldHint": false
         },
         "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
           "type": "object",
           "properties": {
             "ticket_id": {
@@ -75,9 +77,7 @@
           },
           "required": [
             "ticket_id"
-          ],
-          "additionalProperties": false,
-          "$schema": "http://json-schema.org/draft-07/schema#"
+          ]
         },
         "outputSchema": null
       },
@@ -91,6 +91,7 @@
           "openWorldHint": false
         },
         "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
           "type": "object",
           "properties": {
             "query": {
@@ -100,9 +101,7 @@
           },
           "required": [
             "query"
-          ],
-          "additionalProperties": false,
-          "$schema": "http://json-schema.org/draft-07/schema#"
+          ]
         },
         "outputSchema": null
       },
@@ -116,24 +115,25 @@
           "openWorldHint": false
         },
         "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
           "type": "object",
           "properties": {
             "status": {
+              "description": "Filter by approval status (default pending).",
               "type": "string",
               "enum": [
                 "pending",
                 "approved",
                 "denied"
-              ],
-              "description": "Filter by approval status (default pending)."
+              ]
             },
             "limit": {
+              "description": "Max rows to return (default 20).",
               "type": "integer",
-              "description": "Max rows to return (default 20)."
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
             }
-          },
-          "additionalProperties": false,
-          "$schema": "http://json-schema.org/draft-07/schema#"
+          }
         },
         "outputSchema": null
       },
@@ -147,19 +147,20 @@
           "openWorldHint": false
         },
         "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
           "type": "object",
           "properties": {
             "ticket_id": {
-              "type": "string",
-              "description": "Only entries for this ticket."
+              "description": "Only entries for this ticket.",
+              "type": "string"
             },
             "limit": {
+              "description": "Max rows to return (default 25).",
               "type": "integer",
-              "description": "Max rows to return (default 25)."
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
             }
-          },
-          "additionalProperties": false,
-          "$schema": "http://json-schema.org/draft-07/schema#"
+          }
         },
         "outputSchema": null
       }
