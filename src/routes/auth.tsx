@@ -11,11 +11,24 @@ import { resetDemoData } from "@/lib/reset-demo.functions";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({ meta: [{ title: "Sign in — Agent Gate" }] }),
+  validateSearch: (s: Record<string, unknown>): { next?: string } =>
+    typeof s.next === "string" && s.next.startsWith("/") && !s.next.startsWith("//")
+      ? { next: s.next }
+      : {},
   component: AuthPage,
 });
 
 function AuthPage() {
   const nav = useNavigate();
+  const { next } = Route.useSearch();
+
+  function goNext() {
+    if (next) {
+      window.location.href = next;
+      return;
+    }
+    nav({ to: "/" });
+  }
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -23,9 +36,10 @@ function AuthPage() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) nav({ to: "/" });
+      if (data.session) goNext();
     });
-  }, [nav]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nav, next]);
 
   async function signIn(e: React.FormEvent) {
     e.preventDefault();
@@ -43,7 +57,7 @@ function AuthPage() {
       }
     }
     setBusy(false);
-    nav({ to: "/" });
+    goNext();
   }
 
   async function signUp(e: React.FormEvent) {
@@ -53,7 +67,7 @@ function AuthPage() {
       email,
       password,
       options: {
-        emailRedirectTo: window.location.origin,
+        emailRedirectTo: next ? `${window.location.origin}${next}` : window.location.origin,
         data: { full_name: name || email.split("@")[0] },
       },
     });
@@ -62,7 +76,7 @@ function AuthPage() {
     toast.success("Account created — signing you in");
     const { error: e2 } = await supabase.auth.signInWithPassword({ email, password });
     if (e2) return toast.error(e2.message);
-    nav({ to: "/" });
+    goNext();
   }
 
   function fill(kind: "agent" | "supervisor") {

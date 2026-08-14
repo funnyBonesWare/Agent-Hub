@@ -7,9 +7,8 @@ import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/")({
   head: () => ({ meta: [{ title: "Inbox — Agent Gate" }] }),
-  validateSearch: (s: Record<string, unknown>) => ({
-    ticket: typeof s.ticket === "string" ? s.ticket : undefined,
-  }),
+  validateSearch: (s: Record<string, unknown>): { ticket?: string } =>
+    typeof s.ticket === "string" ? { ticket: s.ticket } : {},
   component: InboxPage,
 });
 
